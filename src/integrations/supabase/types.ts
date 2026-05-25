@@ -101,11 +101,15 @@ export type Database = {
           created_at: string
           currency: string
           email: string | null
+          environment: string
           id: string
           paid_at: string | null
+          price_id: string | null
           product_label: string
           quote_household_id: string | null
+          report_url: string | null
           status: Database["public"]["Enums"]["order_status"]
+          stripe_customer_id: string | null
           stripe_payment_intent_id: string | null
           stripe_session_id: string | null
           user_id: string | null
@@ -115,11 +119,15 @@ export type Database = {
           created_at?: string
           currency?: string
           email?: string | null
+          environment?: string
           id?: string
           paid_at?: string | null
+          price_id?: string | null
           product_label?: string
           quote_household_id?: string | null
+          report_url?: string | null
           status?: Database["public"]["Enums"]["order_status"]
+          stripe_customer_id?: string | null
           stripe_payment_intent_id?: string | null
           stripe_session_id?: string | null
           user_id?: string | null
@@ -129,11 +137,15 @@ export type Database = {
           created_at?: string
           currency?: string
           email?: string | null
+          environment?: string
           id?: string
           paid_at?: string | null
+          price_id?: string | null
           product_label?: string
           quote_household_id?: string | null
+          report_url?: string | null
           status?: Database["public"]["Enums"]["order_status"]
+          stripe_customer_id?: string | null
           stripe_payment_intent_id?: string | null
           stripe_session_id?: string | null
           user_id?: string | null
@@ -369,6 +381,54 @@ export type Database = {
           },
         ]
       }
+      subscriptions: {
+        Row: {
+          cancel_at_period_end: boolean | null
+          created_at: string
+          current_period_end: string | null
+          current_period_start: string | null
+          environment: string
+          id: string
+          price_id: string
+          product_id: string
+          status: string
+          stripe_customer_id: string
+          stripe_subscription_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          cancel_at_period_end?: boolean | null
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          environment?: string
+          id?: string
+          price_id: string
+          product_id: string
+          status?: string
+          stripe_customer_id: string
+          stripe_subscription_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          cancel_at_period_end?: boolean | null
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          environment?: string
+          id?: string
+          price_id?: string
+          product_id?: string
+          status?: string
+          stripe_customer_id?: string
+          stripe_subscription_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       suppliers: {
         Row: {
           created_at: string
@@ -565,6 +625,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      has_active_subscription: {
+        Args: { check_env?: string; user_uuid: string }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
