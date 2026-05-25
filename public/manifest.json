@@ -1,0 +1,12 @@
+{
+  "name": "LacnéEnergie — porovnanie cien energií",
+  "short_name": "Lacné",
+  "description": "Internetový poradca lacnejších energií. Zisti, kde ušetríš na elektrine a plyne.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0b1a26",
+  "theme_color": "#0fa371",
+  "icons": [
+    { "src": "/app-icon.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
