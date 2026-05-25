@@ -1,12 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import {
-  Outlet,
-  Link,
-  createRootRouteWithContext,
-  useRouter,
-  HeadContent,
-  Scripts,
-} from "@tanstack/react-router";
+import { Outlet, Link, createRootRouteWithContext, useRouter, HeadContent, Scripts } from "@tanstack/react-router";
 
 import appCss from "../styles.css?url";
 
@@ -39,9 +32,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
-        <h1 className="text-xl font-semibold tracking-tight text-foreground">
-          This page didn't load
-        </h1>
+        <h1 className="text-xl font-semibold tracking-tight text-foreground">This page didn't load</h1>
         <p className="mt-2 text-sm text-muted-foreground">
           Something went wrong on our end. You can try refreshing or head back home.
         </p>
@@ -73,11 +64,15 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
       { title: "LacnéEnergie — porovnanie dodávateľov energií 2026" },
-      { name: "description", content: "Za 2 € ti povieme, u ktorého dodávateľa elektriny a plynu ušetríš najviac. Personalizovaný report a presný postup zmeny." },
+      {
+        name: "description",
+        content:
+          "Za 2 € ti povieme, u ktorého dodávateľa elektriny a plynu ušetríš najviac. Personalizovaný report a presný postup zmeny.",
+      },
       { name: "author", content: "Foton energy s.r.o." },
       { name: "theme-color", content: "#0fa371" },
       { property: "og:title", content: "LacnéEnergie — porovnanie dodávateľov energií" },
-      { property: "og:description", content: "Za 2 € ušetríš ročne stovky eur na energiách." },
+      { property: "og:description", content: "Za 2,21 € ušetríš ročne stovky eur na energiách." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
