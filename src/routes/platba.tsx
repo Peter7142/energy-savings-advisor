@@ -22,7 +22,7 @@ export const Route = createFileRoute("/platba")({
 
 function PlatbaPage() {
   const { product = "report", quoteId } = useSearch({ from: "/platba" });
-  const cfg = PRICES[product];
+  const cfg = PRICES[product as keyof typeof PRICES];
   const [email, setEmail] = useState<string | undefined>();
   const [userId, setUserId] = useState<string | undefined>();
   const [ready, setReady] = useState(false);
