@@ -8,7 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 type Search = { product?: "report" | "watch"; quoteId?: string };
 
 const PRICES = {
-  report: { id: "savings_report_onetime", label: "Personalizovaný report úspory", amount: "2 €" },
+  report: { id: "savings_report_onetime", label: "Personalizovaný report úspory", amount: "2,21 €" },
   watch: { id: "price_watch_yearly_sub", label: "Ročné sledovanie cien", amount: "9 € / rok" },
 } as const;
 
