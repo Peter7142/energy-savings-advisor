@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as UcetRouteImport } from './routes/ucet'
+import { Route as PlatbaRouteImport } from './routes/platba'
 import { Route as KalkulackaRouteImport } from './routes/kalkulacka'
 import { Route as CenyRouteImport } from './routes/ceny'
 import { Route as IndexRouteImport } from './routes/index'
@@ -18,6 +19,11 @@ import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/publi
 const UcetRoute = UcetRouteImport.update({
   id: '/ucet',
   path: '/ucet',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlatbaRoute = PlatbaRouteImport.update({
+  id: '/platba',
+  path: '/platba',
   getParentRoute: () => rootRouteImport,
 } as any)
 const KalkulackaRoute = KalkulackaRouteImport.update({
@@ -46,6 +52,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/ceny': typeof CenyRoute
   '/kalkulacka': typeof KalkulackaRoute
+  '/platba': typeof PlatbaRoute
   '/ucet': typeof UcetRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
@@ -53,6 +60,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/ceny': typeof CenyRoute
   '/kalkulacka': typeof KalkulackaRoute
+  '/platba': typeof PlatbaRoute
   '/ucet': typeof UcetRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
@@ -61,6 +69,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/ceny': typeof CenyRoute
   '/kalkulacka': typeof KalkulackaRoute
+  '/platba': typeof PlatbaRoute
   '/ucet': typeof UcetRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
@@ -70,15 +79,23 @@ export interface FileRouteTypes {
     | '/'
     | '/ceny'
     | '/kalkulacka'
+    | '/platba'
     | '/ucet'
     | '/api/public/payments/webhook'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/ceny' | '/kalkulacka' | '/ucet' | '/api/public/payments/webhook'
+  to:
+    | '/'
+    | '/ceny'
+    | '/kalkulacka'
+    | '/platba'
+    | '/ucet'
+    | '/api/public/payments/webhook'
   id:
     | '__root__'
     | '/'
     | '/ceny'
     | '/kalkulacka'
+    | '/platba'
     | '/ucet'
     | '/api/public/payments/webhook'
   fileRoutesById: FileRoutesById
@@ -87,6 +104,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CenyRoute: typeof CenyRoute
   KalkulackaRoute: typeof KalkulackaRoute
+  PlatbaRoute: typeof PlatbaRoute
   UcetRoute: typeof UcetRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
 }
@@ -98,6 +116,13 @@ declare module '@tanstack/react-router' {
       path: '/ucet'
       fullPath: '/ucet'
       preLoaderRoute: typeof UcetRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/platba': {
+      id: '/platba'
+      path: '/platba'
+      fullPath: '/platba'
+      preLoaderRoute: typeof PlatbaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/kalkulacka': {
@@ -135,9 +160,20 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CenyRoute: CenyRoute,
   KalkulackaRoute: KalkulackaRoute,
+  PlatbaRoute: PlatbaRoute,
   UcetRoute: UcetRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
