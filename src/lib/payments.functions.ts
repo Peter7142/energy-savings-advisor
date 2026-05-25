@@ -1,14 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
-import { createClient } from "@supabase/supabase-js";
 import { type StripeEnv, createStripeClient } from "./stripe.server";
 
-let _admin: ReturnType<typeof createClient> | null = null;
-function admin() {
-  if (!_admin) {
-    _admin = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
-  }
-  return _admin;
-}
+
 
 async function resolveOrCreateCustomer(
   stripe: ReturnType<typeof createStripeClient>,
@@ -92,7 +85,8 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
       ...(!isRecurring && { payment_intent_data: { description: productDescription, metadata } }),
       metadata,
       ...(isRecurring && { subscription_data: { metadata } }),
-    });
+    } as any);
+
 
     return session.client_secret;
   });

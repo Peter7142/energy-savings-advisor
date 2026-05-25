@@ -21,8 +21,8 @@ export function createStripeClient(env: StripeEnv): Stripe {
   const lovableApiKey = getEnv('LOVABLE_API_KEY');
 
   return new Stripe(connectionApiKey, {
-    apiVersion: '2026-03-25.dahlia' as Stripe.LatestApiVersion,
-    httpClient: Stripe.createFetchHttpClient((url: string | URL, init?: RequestInit) => {
+    apiVersion: '2026-03-25.dahlia' as any,
+    httpClient: Stripe.createFetchHttpClient(((url: any, init?: any) => {
       const gatewayUrl = url.toString().replace('https://api.stripe.com', GATEWAY_STRIPE_BASE);
       return fetch(gatewayUrl, {
         ...init,
@@ -32,8 +32,9 @@ export function createStripeClient(env: StripeEnv): Stripe {
           'Lovable-API-Key': lovableApiKey,
         },
       });
-    }),
+    }) as any),
   });
+
 }
 
 export async function verifyWebhook(req: Request, env: StripeEnv): Promise<{ type: string; data: { object: any } }> {
