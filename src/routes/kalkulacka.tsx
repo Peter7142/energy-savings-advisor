@@ -1,10 +1,12 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowRight } from "lucide-react";
+import { parseInvoice } from "@/lib/invoice-parser.functions";
+import { ArrowRight, Upload, Loader2, Sparkles, ShieldCheck } from "lucide-react";
 
 export const Route = createFileRoute("/kalkulacka")({
   component: KalkulackaPage,
@@ -29,6 +31,62 @@ function KalkulackaPage() {
   const [email, setEmail] = useState<string>("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [scanning, setScanning] = useState(false);
+  const [scanInfo, setScanInfo] = useState<string | null>(null);
+  const fileRef = useRef<HTMLInputElement | null>(null);
+  const callParseInvoice = useServerFn(parseInvoice);
+
+  function fileToDataUrl(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = () => reject(new Error("Súbor sa nepodarilo načítať."));
+      reader.readAsDataURL(file);
+    });
+  }
+
+  async function handleInvoiceUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    setError(null);
+    setScanInfo(null);
+
+    const allowed = ["image/jpeg", "image/png", "image/webp", "image/heic", "application/pdf"];
+    if (!allowed.includes(file.type)) {
+      setError("Podporujeme JPG, PNG, WEBP alebo PDF.");
+      return;
+    }
+    if (file.size > 8 * 1024 * 1024) {
+      setError("Súbor je príliš veľký (max 8 MB).");
+      return;
+    }
+
+    setScanning(true);
+    try {
+      const dataUrl = await fileToDataUrl(file);
+      const res = await callParseInvoice({ data: { dataUrl, mimeType: file.type } });
+      if (res.error || !res.parsed) {
+        setError(res.error || "AI nevedela prečítať faktúru.");
+        return;
+      }
+      const p = res.parsed;
+      const filled: string[] = [];
+      if (p.distribution_area) { setDistribution(p.distribution_area); filled.push("distribúcia"); }
+      if (p.annual_consumption_kwh) { setAnnualKwh(String(Math.round(p.annual_consumption_kwh))); filled.push("spotreba"); }
+      if (p.tariff_band) { setTariff(p.tariff_band); filled.push("tarifa"); }
+      if (p.current_supplier) { setSupplier(p.current_supplier); filled.push("dodávateľ"); }
+      if (p.includes_gas !== null) setIncludesGas(p.includes_gas);
+      if (p.includes_gas && p.annual_gas_kwh) { setAnnualGas(String(Math.round(p.annual_gas_kwh))); filled.push("plyn"); }
+      setScanInfo(filled.length
+        ? `Vyplnené: ${filled.join(", ")}. Skontroluj hodnoty.`
+        : "AI nenašla žiadne údaje, vyplň ich ručne.");
+    } catch (err: any) {
+      setError(err?.message || "Spracovanie zlyhalo.");
+    } finally {
+      setScanning(false);
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -84,8 +142,43 @@ function KalkulackaPage() {
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-5 rounded-2xl border border-border bg-card p-5">
+          <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 space-y-3">
+            <div className="flex items-start gap-2">
+              <Sparkles className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+              <div>
+                <p className="font-semibold text-sm">Nahraj faktúru a AI vyplní polia za teba</p>
+                <p className="text-xs text-muted-foreground">Odfoť alebo nahraj PDF/obrázok faktúry. AI prečíta údaje a predvyplní formulár.</p>
+              </div>
+            </div>
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/heic,application/pdf"
+              capture="environment"
+              className="hidden"
+              onChange={handleInvoiceUpload}
+            />
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              disabled={scanning}
+              onClick={() => fileRef.current?.click()}
+            >
+              {scanning ? (
+                <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Spracúvam faktúru…</>
+              ) : (
+                <><Upload className="w-4 h-4 mr-2" /> Nahrať / odfotiť faktúru</>
+              )}
+            </Button>
+            {scanInfo && <p className="text-xs text-primary">{scanInfo}</p>}
+            <p className="text-[11px] text-muted-foreground flex items-start gap-1">
+              <ShieldCheck className="w-3 h-3 mt-0.5 shrink-0" />
+              <span>Faktúra sa po spracovaní okamžite zahodí — neukladáme ju. Spracovanie prebieha v EU. Viac v <a href="/ochrana-udajov" className="underline">Ochrane údajov</a>.</span>
+            </p>
+          </div>
+
           <div>
-            <label className="block text-sm font-medium mb-2">Distribučná oblasť</label>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               {DIST.map((d) => (
                 <button
