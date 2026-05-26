@@ -145,9 +145,6 @@ function KalkulackaPage() {
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-5 rounded-2xl border border-border bg-card p-5">
-          <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 space-y-3">
-            <div className="flex items-start gap-2">
-              <Sparkles className="w-5 h-5 text-primary shrink-0 mt-0.5" />
           <Tabs value={mode} onValueChange={(v) => setMode(v as typeof mode)} className="w-full">
             <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="upload"><Upload className="w-4 h-4 mr-1" /> Nahrať</TabsTrigger>
