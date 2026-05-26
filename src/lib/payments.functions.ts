@@ -1,7 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
-import { type StripeEnv, createStripeClient } from "./stripe.server";
-
-
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { type StripeEnv, createStripeClient, getStripeErrorMessage } from "./stripe.server";
 
 async function resolveOrCreateCustomer(
   stripe: ReturnType<typeof createStripeClient>,
@@ -50,43 +49,71 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
     return data;
   })
   .handler(async ({ data }) => {
-    const stripe = createStripeClient(data.environment);
+    try {
+      const stripe = createStripeClient(data.environment);
+      const prices = await stripe.prices.list({ lookup_keys: [data.priceId] });
+      if (!prices.data.length) throw new Error("Price not found");
+      const stripePrice = prices.data[0];
+      const isRecurring = stripePrice.type === "recurring";
 
-    const prices = await stripe.prices.list({ lookup_keys: [data.priceId] });
-    if (!prices.data.length) throw new Error("Price not found");
-    const stripePrice = prices.data[0];
-    const isRecurring = stripePrice.type === "recurring";
+      const customerId = (data.customerEmail || data.userId)
+        ? await resolveOrCreateCustomer(stripe, { email: data.customerEmail, userId: data.userId })
+        : undefined;
 
-    const customerId = (data.customerEmail || data.userId)
-      ? await resolveOrCreateCustomer(stripe, { email: data.customerEmail, userId: data.userId })
-      : undefined;
+      let productDescription: string | undefined;
+      if (!isRecurring) {
+        const productId = typeof stripePrice.product === "string"
+          ? stripePrice.product
+          : stripePrice.product.id;
+        const product = await stripe.products.retrieve(productId);
+        productDescription = product.name;
+      }
 
-    let productDescription: string | undefined;
-    if (!isRecurring) {
-      const productId = typeof stripePrice.product === "string"
-        ? stripePrice.product
-        : stripePrice.product.id;
-      const product = await stripe.products.retrieve(productId);
-      productDescription = product.name;
+      const metadata: Record<string, string> = {};
+      if (data.userId) metadata.userId = data.userId;
+      if (data.quoteId) metadata.quoteId = data.quoteId;
+      metadata.priceId = data.priceId;
+
+      const session = await stripe.checkout.sessions.create({
+        line_items: [{ price: stripePrice.id, quantity: data.quantity || 1 }],
+        mode: isRecurring ? "subscription" : "payment",
+        ui_mode: "embedded_page",
+        return_url: data.returnUrl,
+        managed_payments: { enabled: true },
+        ...(customerId && { customer: customerId }),
+        ...(!isRecurring && { payment_intent_data: { description: productDescription, metadata } }),
+        metadata,
+        ...(isRecurring && { subscription_data: { metadata } }),
+      } as any);
+
+      return { clientSecret: session.client_secret as string };
+    } catch (error) {
+      return { error: getStripeErrorMessage(error) };
     }
+  });
 
-    const metadata: Record<string, string> = {};
-    if (data.userId) metadata.userId = data.userId;
-    if (data.quoteId) metadata.quoteId = data.quoteId;
-    metadata.priceId = data.priceId;
-
-    const session = await stripe.checkout.sessions.create({
-      line_items: [{ price: stripePrice.id, quantity: data.quantity || 1 }],
-      mode: isRecurring ? "subscription" : "payment",
-      ui_mode: "embedded_page",
-      return_url: data.returnUrl,
-      managed_payments: { enabled: true },
-      ...(customerId && { customer: customerId }),
-      ...(!isRecurring && { payment_intent_data: { description: productDescription, metadata } }),
-      metadata,
-      ...(isRecurring && { subscription_data: { metadata } }),
-    } as any);
-
-
-    return session.client_secret;
+export const createPortalSession = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: { returnUrl: string; environment: StripeEnv }) => data)
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { data: sub, error } = await supabase
+      .from("subscriptions")
+      .select("stripe_customer_id")
+      .eq("user_id", userId)
+      .eq("environment", data.environment)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (error || !sub?.stripe_customer_id) return { error: "Žiadne aktívne predplatné." };
+    try {
+      const stripe = createStripeClient(data.environment);
+      const portal = await stripe.billingPortal.sessions.create({
+        customer: sub.stripe_customer_id,
+        return_url: data.returnUrl,
+      });
+      return { url: portal.url };
+    } catch (error) {
+      return { error: getStripeErrorMessage(error) };
+    }
   });
