@@ -11,9 +11,9 @@ export const Route = createFileRoute("/kalkulacka")({
 });
 
 const DIST = [
-  { v: "zse", label: "Západoslovenská (ZSE)" },
-  { v: "sse", label: "Stredoslovenská (SSE)" },
-  { v: "vse", label: "Východoslovenská (VSE)" },
+  { v: "ZSD", label: "Západoslovenská (ZSD)" },
+  { v: "SSD", label: "Stredoslovenská (SSD)" },
+  { v: "VSD", label: "Východoslovenská (VSD)" },
 ] as const;
 const TARIFFS = ["DD1", "DD2", "DD3", "DD4", "Neviem"];
 const SUPPLIERS = ["ZSE", "SSE", "VSE", "Magna Energia", "Slovak Energy", "ČEZ", "Iný / neviem"];
