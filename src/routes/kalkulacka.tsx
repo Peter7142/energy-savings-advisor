@@ -152,7 +152,7 @@ function KalkulackaPage() {
           {error && <p className="text-sm text-destructive">{error}</p>}
 
           <Button type="submit" size="lg" disabled={submitting} className="w-full min-h-12">
-            {submitting ? "Pripravujem…" : <>Pokračovať na platbu 2,21&nbsp;€ <ArrowRight className="w-4 h-4 ml-1" /></>}
+            {submitting ? "Pripravujem…" : <>Pokračovať na platbu 4,90&nbsp;€ <ArrowRight className="w-4 h-4 ml-1" /></>}
           </Button>
         </form>
       </div>
