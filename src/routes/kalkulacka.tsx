@@ -1,10 +1,12 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowRight } from "lucide-react";
+import { parseInvoice } from "@/lib/invoice-parser.functions";
+import { ArrowRight, Upload, Loader2, Sparkles, ShieldCheck } from "lucide-react";
 
 export const Route = createFileRoute("/kalkulacka")({
   component: KalkulackaPage,
