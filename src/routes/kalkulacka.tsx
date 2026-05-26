@@ -142,8 +142,43 @@ function KalkulackaPage() {
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-5 rounded-2xl border border-border bg-card p-5">
+          <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 space-y-3">
+            <div className="flex items-start gap-2">
+              <Sparkles className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+              <div>
+                <p className="font-semibold text-sm">Nahraj faktúru a AI vyplní polia za teba</p>
+                <p className="text-xs text-muted-foreground">Odfoť alebo nahraj PDF/obrázok faktúry. AI prečíta údaje a predvyplní formulár.</p>
+              </div>
+            </div>
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/heic,application/pdf"
+              capture="environment"
+              className="hidden"
+              onChange={handleInvoiceUpload}
+            />
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              disabled={scanning}
+              onClick={() => fileRef.current?.click()}
+            >
+              {scanning ? (
+                <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Spracúvam faktúru…</>
+              ) : (
+                <><Upload className="w-4 h-4 mr-2" /> Nahrať / odfotiť faktúru</>
+              )}
+            </Button>
+            {scanInfo && <p className="text-xs text-primary">{scanInfo}</p>}
+            <p className="text-[11px] text-muted-foreground flex items-start gap-1">
+              <ShieldCheck className="w-3 h-3 mt-0.5 shrink-0" />
+              <span>Faktúra sa po spracovaní okamžite zahodí — neukladáme ju. Spracovanie prebieha v EU. Viac v <a href="/ochrana-udajov" className="underline">Ochrane údajov</a>.</span>
+            </p>
+          </div>
+
           <div>
-            <label className="block text-sm font-medium mb-2">Distribučná oblasť</label>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               {DIST.map((d) => (
                 <button
