@@ -4,9 +4,10 @@ import { useServerFn } from "@tanstack/react-start";
 import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { parseInvoice } from "@/lib/invoice-parser.functions";
-import { ArrowRight, Upload, Loader2, Sparkles, ShieldCheck } from "lucide-react";
+import { ArrowRight, Upload, Loader2, Sparkles, ShieldCheck, Camera, Pencil } from "lucide-react";
 
 export const Route = createFileRoute("/kalkulacka")({
   component: KalkulackaPage,
