@@ -84,6 +84,7 @@ function KalkulackaPage() {
       setScanInfo(filled.length
         ? `Vyplnené: ${filled.join(", ")}. Skontroluj hodnoty.`
         : "AI nenašla žiadne údaje, vyplň ich ručne.");
+      setMode("manual");
     } catch (err: any) {
       setError(err?.message || "Spracovanie zlyhalo.");
     } finally {
