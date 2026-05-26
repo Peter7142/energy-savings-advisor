@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createClient } from "@supabase/supabase-js";
 import { type StripeEnv, verifyWebhook } from "@/lib/stripe.server";
+import { sendEmail, renderReportEmail } from "@/lib/email.server";
 
 let _supabase: any = null;
 function getSupabase(): any {
@@ -10,7 +11,6 @@ function getSupabase(): any {
   return _supabase;
 }
 
-
 function resolvePriceId(item: any): string {
   return item?.price?.lookup_key
     || item?.price?.metadata?.lovable_external_id
@@ -19,10 +19,7 @@ function resolvePriceId(item: any): string {
 
 async function handleSubscriptionCreated(subscription: any, env: StripeEnv) {
   const userId = subscription.metadata?.userId;
-  if (!userId) {
-    console.error("No userId in subscription metadata");
-    return;
-  }
+  if (!userId) { console.error("No userId in subscription metadata"); return; }
   const item = subscription.items?.data?.[0];
   const priceId = resolvePriceId(item);
   const productId = item?.price?.product;
@@ -67,6 +64,18 @@ async function handleSubscriptionUpdated(subscription: any, env: StripeEnv) {
     })
     .eq("stripe_subscription_id", subscription.id)
     .eq("environment", env);
+
+  // Notify on cancellation scheduled or status changes
+  if (subscription.cancel_at_period_end || subscription.status === "canceled") {
+    const email = (subscription as any)?.customer_email || null;
+    if (email) {
+      await sendEmail({
+        to: email,
+        subject: "Vaše predplatné LacnéEnergie",
+        html: `<p>Vaše predplatné bolo aktualizované. Stav: <strong>${subscription.status}</strong>.</p>`,
+      });
+    }
+  }
 }
 
 async function handleSubscriptionDeleted(subscription: any, env: StripeEnv) {
@@ -78,16 +87,26 @@ async function handleSubscriptionDeleted(subscription: any, env: StripeEnv) {
 }
 
 async function handleCheckoutCompleted(session: any, env: StripeEnv) {
-  // One-time payments → record an order row + queue a report generation
   if (session.mode !== "payment") return;
   const md = session.metadata || {};
   const priceId = md.priceId || null;
-  const userId = md.userId || null;
+  let userId: string | null = md.userId || null;
   const quoteId = md.quoteId || null;
   const amount = session.amount_total ?? 0;
   const email = session.customer_details?.email || session.customer_email || null;
 
   const supabase = getSupabase();
+
+  // Guest recovery: if no userId but we have an email matching an auth user, link it
+  if (!userId && email) {
+    const { data: prof } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("email", email)
+      .maybeSingle();
+    if (prof?.id) userId = prof.id;
+  }
+
   await supabase.from("orders").upsert(
     {
       user_id: userId,
@@ -107,10 +126,78 @@ async function handleCheckoutCompleted(session: any, env: StripeEnv) {
     { onConflict: "stripe_session_id" }
   );
 
-  // Mark the underlying quote as paid so the user can access the full report
+  // Generate report row + send email
   if (quoteId) {
     await supabase.from("quotes_household").update({ paid: true }).eq("id", quoteId);
+
+    const { data: quote } = await supabase
+      .from("quotes_household")
+      .select("*")
+      .eq("id", quoteId)
+      .maybeSingle();
+
+    if (quote) {
+      // Pick top 3 cheapest validated tariffs for this distribution
+      const { data: tariffs } = await supabase
+        .from("tariffs")
+        .select("id, product_name, unit_price_eur_per_kwh, monthly_fee_eur, supplier_id, suppliers(name)")
+        .eq("status", "validated")
+        .eq("segment", "household")
+        .eq("energy_type", "electricity")
+        .or(`distribution_area.eq.${quote.distribution_area},distribution_area.is.null`)
+        .order("unit_price_eur_per_kwh", { ascending: true })
+        .limit(3);
+
+      const recommendations = (tariffs ?? []).map((t: any) => ({
+        supplier: t.suppliers?.name ?? "—",
+        product: t.product_name,
+        unit_price: t.unit_price_eur_per_kwh,
+        monthly_fee: t.monthly_fee_eur,
+      }));
+
+      const { data: report } = await supabase.from("reports").insert({
+        user_id: userId,
+        quote_household_id: quoteId,
+        order_id: null,
+        email,
+        top_recommendations: recommendations,
+        estimated_savings_eur: quote.estimated_savings_eur ?? 0,
+        instructions_md: "Pozri si TOP 3 odporúčania v účte a podpíš zmluvu s vybraným dodávateľom.",
+      }).select("id").single();
+
+      if (email) {
+        const origin = process.env.PUBLIC_SITE_URL || "https://frugal-energy-finder.lovable.app";
+        await sendEmail({
+          to: email,
+          subject: "Váš report úspory je pripravený",
+          html: renderReportEmail({
+            estimatedSavings: Number(quote.estimated_savings_eur ?? 0),
+            distribution: quote.distribution_area,
+            annualKwh: Number(quote.annual_consumption_kwh ?? 0),
+            reportUrl: `${origin}/ucet?session_id=${session.id}`,
+          }),
+        });
+      }
+
+      if (report?.id) {
+        await supabase.from("orders").update({ report_url: `/ucet?report=${report.id}` })
+          .eq("stripe_session_id", session.id);
+      }
+    }
   }
+}
+
+async function handleInvoicePaid(invoice: any, env: StripeEnv) {
+  // Renewal notification
+  const email = invoice.customer_email;
+  if (email && invoice.billing_reason === "subscription_cycle") {
+    await sendEmail({
+      to: email,
+      subject: "Vaše predplatné LacnéEnergie bolo obnovené",
+      html: `<p>Vaše ročné predplatné sledovania cien bolo úspešne obnovené. Ďakujeme.</p>`,
+    });
+  }
+  console.log("invoice.paid", invoice.id, env);
 }
 
 async function handleWebhook(req: Request, env: StripeEnv) {
@@ -127,6 +214,9 @@ async function handleWebhook(req: Request, env: StripeEnv) {
       break;
     case "customer.subscription.deleted":
       await handleSubscriptionDeleted(event.data.object, env);
+      break;
+    case "invoice.payment_succeeded":
+      await handleInvoicePaid(event.data.object, env);
       break;
     default:
       console.log("Unhandled event:", event.type);
