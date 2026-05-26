@@ -67,7 +67,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       {
         name: "description",
         content:
-          "Za 2 € ti povieme, u ktorého dodávateľa elektriny a plynu ušetríš najviac. Personalizovaný report a presný postup zmeny.",
+          "Za 4,90 € ti povieme, u ktorého dodávateľa elektriny a plynu ušetríš najviac. Personalizovaný report a presný postup zmeny.",
       },
       { name: "author", content: "Foton energy s.r.o." },
       { name: "theme-color", content: "#0fa371" },
