@@ -18,7 +18,7 @@ function Home() {
       <section className="container mx-auto px-4 pt-6 pb-12 lg:pt-16 lg:pb-20">
         <div className="text-center max-w-2xl mx-auto">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-secondary text-xs font-medium text-secondary-foreground mb-4">
-            <Zap className="w-3 h-3 text-primary" /> Internetový poradca lacnejších energií
+            <Zap className="w-3 h-3 text-primary" /> Nezávislí internetový poradca lacnejších energií
           </div>
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-tight">
             Za <span className="brand-text-gradient">2,21&nbsp;€</span> ušetríš ročne
