@@ -11,7 +11,7 @@ export const Route = createFileRoute("/obchodne-podmienky")({
         <h2 className="font-semibold mt-4">1. Predmet</h2>
         <p>Informačné poradenstvo — porovnanie cien dodávateľov energií a vypracovanie personalizovaného reportu úspory. Nie sme sprostredkovateľom zmluvy v energetike podľa § 14 zák. 251/2012 Z. z.</p>
         <h2 className="font-semibold mt-4">2. Produkty a ceny</h2>
-        <ul className="list-disc pl-5"><li>Personalizovaný report úspory — 2,21 € (jednorazovo)</li><li>Ročné sledovanie cien — 9 € / rok (predplatné)</li></ul>
+        <ul className="list-disc pl-5"><li>Personalizovaný report úspory — 4,90 € (jednorazovo)</li><li>Ročné sledovanie cien — 9 € / rok (predplatné)</li></ul>
         <h2 className="font-semibold mt-4">3. Platba</h2>
         <p>Platba prebieha cez Stripe. Akceptujeme karty Visa, Mastercard, Apple Pay a Google Pay.</p>
         <h2 className="font-semibold mt-4">4. Dodanie</h2>

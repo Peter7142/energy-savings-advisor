@@ -21,7 +21,7 @@ function Home() {
             <Zap className="w-3 h-3 text-primary" /> Nezávislí internetový poradca lacnejších energií
           </div>
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-tight">
-            Za <span className="brand-text-gradient">2,21&nbsp;€</span> ušetríš ročne
+            Za <span className="brand-text-gradient">4,90&nbsp;€</span> ušetríš ročne
             <br />
             <span className="brand-text-gradient">stovky eur</span> na energiách
           </h1>
@@ -49,7 +49,7 @@ function Home() {
                 <>
                   <h2 className="text-xl font-bold mb-2">Pre domácnosť</h2>
                   <p className="text-sm text-muted-foreground mb-4">
-                    Odpovedz na 5 otázok (región, spotreba, dodávateľ) a za 2 € dostaneš personalizovaný report: TOP 3
+                    Odpovedz na 5 otázok (región, spotreba, dodávateľ) a za 4,90 € dostaneš personalizovaný report: TOP 3
                     najlacnejší dodávatelia + presná ročná úspora v eurách + krok-za-krokom postup, ako prejsť.
                   </p>
                 </>

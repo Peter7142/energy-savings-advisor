@@ -80,7 +80,7 @@ function KalkulackaPage() {
       <div className="container mx-auto px-4 py-8 max-w-xl">
         <h1 className="text-2xl font-bold mb-1">Kalkulačka úspory</h1>
         <p className="text-sm text-muted-foreground mb-6">
-          Vyplň 5 polí, my pripravíme personalizovaný report za 2,21 €.
+          Vyplň 5 polí, my pripravíme personalizovaný report za 4,90 €.
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-5 rounded-2xl border border-border bg-card p-5">
@@ -152,7 +152,7 @@ function KalkulackaPage() {
           {error && <p className="text-sm text-destructive">{error}</p>}
 
           <Button type="submit" size="lg" disabled={submitting} className="w-full min-h-12">
-            {submitting ? "Pripravujem…" : <>Pokračovať na platbu 2,21&nbsp;€ <ArrowRight className="w-4 h-4 ml-1" /></>}
+            {submitting ? "Pripravujem…" : <>Pokračovať na platbu 4,90&nbsp;€ <ArrowRight className="w-4 h-4 ml-1" /></>}
           </Button>
         </form>
       </div>
