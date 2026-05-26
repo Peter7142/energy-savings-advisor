@@ -49,7 +49,7 @@ function Home() {
                 <>
                   <h2 className="text-xl font-bold mb-2">Pre domácnosť</h2>
                   <p className="text-sm text-muted-foreground mb-4">
-                    Odpovedz na 5 otázok (región, spotreba, dodávateľ) a za 2 € dostaneš personalizovaný report: TOP 3
+                    Odpovedz na 5 otázok (región, spotreba, dodávateľ) a za 4,90 € dostaneš personalizovaný report: TOP 3
                     najlacnejší dodávatelia + presná ročná úspora v eurách + krok-za-krokom postup, ako prejsť.
                   </p>
                 </>
