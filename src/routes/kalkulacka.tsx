@@ -34,7 +34,7 @@ function KalkulackaPage() {
   const [error, setError] = useState<string | null>(null);
   const [scanning, setScanning] = useState(false);
   const [scanInfo, setScanInfo] = useState<string | null>(null);
-  const [mode, setMode] = useState<"upload" | "photo" | "manual">("upload");
+  const [mode, setMode] = useState<Mode>("upload");
   const uploadRef = useRef<HTMLInputElement | null>(null);
   const photoRef = useRef<HTMLInputElement | null>(null);
   const callParseInvoice = useServerFn(parseInvoice);
