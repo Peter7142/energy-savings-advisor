@@ -18,7 +18,8 @@ export const Route = createFileRoute("/prihlasenie")({
 
 function PrihlaseniePage() {
   const navigate = useNavigate();
-  const { redirect } = Route.useSearch();
+  const search = Route.useSearch() as Search;
+  const redirect = search.redirect;
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -84,8 +85,8 @@ function PrihlaseniePage() {
             </Button>
             <p className="text-xs text-muted-foreground text-center pt-2">
               Prihlásením súhlasíte s{" "}
-              <Link to="/obchodne-podmienky" className="underline">obchodnými podmienkami</Link> a{" "}
-              <Link to="/ochrana-udajov" className="underline">ochranou údajov</Link>.
+              <a href="/obchodne-podmienky" className="underline">obchodnými podmienkami</a> a{" "}
+              <a href="/ochrana-udajov" className="underline">ochranou údajov</a>.
             </p>
           </form>
         )}

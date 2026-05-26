@@ -74,3 +74,12 @@ export async function verifyWebhook(req: Request, env: StripeEnv): Promise<{ typ
 }
 
 export const RAW_BODY: unique symbol = Symbol('raw');
+
+export function getStripeErrorMessage(error: unknown): string {
+  if (error && typeof error === 'object') {
+    const e = error as any;
+    const msg = e.raw?.message ?? e.message;
+    if (msg) return msg;
+  }
+  return 'Stripe request failed';
+}

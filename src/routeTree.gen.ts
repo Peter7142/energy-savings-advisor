@@ -9,21 +9,35 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as UcetRouteImport } from './routes/ucet'
+import { Route as PrihlasenieRouteImport } from './routes/prihlasenie'
 import { Route as PlatbaRouteImport } from './routes/platba'
+import { Route as OchranaUdajovRouteImport } from './routes/ochrana-udajov'
+import { Route as ObchodnePodmienkyRouteImport } from './routes/obchodne-podmienky'
 import { Route as KalkulackaRouteImport } from './routes/kalkulacka'
 import { Route as CenyRouteImport } from './routes/ceny'
+import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedUcetRouteImport } from './routes/_authenticated/ucet'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 
-const UcetRoute = UcetRouteImport.update({
-  id: '/ucet',
-  path: '/ucet',
+const PrihlasenieRoute = PrihlasenieRouteImport.update({
+  id: '/prihlasenie',
+  path: '/prihlasenie',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PlatbaRoute = PlatbaRouteImport.update({
   id: '/platba',
   path: '/platba',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OchranaUdajovRoute = OchranaUdajovRouteImport.update({
+  id: '/ochrana-udajov',
+  path: '/ochrana-udajov',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ObchodnePodmienkyRoute = ObchodnePodmienkyRouteImport.update({
+  id: '/obchodne-podmienky',
+  path: '/obchodne-podmienky',
   getParentRoute: () => rootRouteImport,
 } as any)
 const KalkulackaRoute = KalkulackaRouteImport.update({
@@ -36,10 +50,19 @@ const CenyRoute = CenyRouteImport.update({
   path: '/ceny',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedRoute = AuthenticatedRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedUcetRoute = AuthenticatedUcetRouteImport.update({
+  id: '/ucet',
+  path: '/ucet',
+  getParentRoute: () => AuthenticatedRoute,
 } as any)
 const ApiPublicPaymentsWebhookRoute =
   ApiPublicPaymentsWebhookRouteImport.update({
@@ -52,25 +75,35 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/ceny': typeof CenyRoute
   '/kalkulacka': typeof KalkulackaRoute
+  '/obchodne-podmienky': typeof ObchodnePodmienkyRoute
+  '/ochrana-udajov': typeof OchranaUdajovRoute
   '/platba': typeof PlatbaRoute
-  '/ucet': typeof UcetRoute
+  '/prihlasenie': typeof PrihlasenieRoute
+  '/ucet': typeof AuthenticatedUcetRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/ceny': typeof CenyRoute
   '/kalkulacka': typeof KalkulackaRoute
+  '/obchodne-podmienky': typeof ObchodnePodmienkyRoute
+  '/ochrana-udajov': typeof OchranaUdajovRoute
   '/platba': typeof PlatbaRoute
-  '/ucet': typeof UcetRoute
+  '/prihlasenie': typeof PrihlasenieRoute
+  '/ucet': typeof AuthenticatedUcetRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/ceny': typeof CenyRoute
   '/kalkulacka': typeof KalkulackaRoute
+  '/obchodne-podmienky': typeof ObchodnePodmienkyRoute
+  '/ochrana-udajov': typeof OchranaUdajovRoute
   '/platba': typeof PlatbaRoute
-  '/ucet': typeof UcetRoute
+  '/prihlasenie': typeof PrihlasenieRoute
+  '/_authenticated/ucet': typeof AuthenticatedUcetRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRouteTypes {
@@ -79,7 +112,10 @@ export interface FileRouteTypes {
     | '/'
     | '/ceny'
     | '/kalkulacka'
+    | '/obchodne-podmienky'
+    | '/ochrana-udajov'
     | '/platba'
+    | '/prihlasenie'
     | '/ucet'
     | '/api/public/payments/webhook'
   fileRoutesByTo: FileRoutesByTo
@@ -87,35 +123,45 @@ export interface FileRouteTypes {
     | '/'
     | '/ceny'
     | '/kalkulacka'
+    | '/obchodne-podmienky'
+    | '/ochrana-udajov'
     | '/platba'
+    | '/prihlasenie'
     | '/ucet'
     | '/api/public/payments/webhook'
   id:
     | '__root__'
     | '/'
+    | '/_authenticated'
     | '/ceny'
     | '/kalkulacka'
+    | '/obchodne-podmienky'
+    | '/ochrana-udajov'
     | '/platba'
-    | '/ucet'
+    | '/prihlasenie'
+    | '/_authenticated/ucet'
     | '/api/public/payments/webhook'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   CenyRoute: typeof CenyRoute
   KalkulackaRoute: typeof KalkulackaRoute
+  ObchodnePodmienkyRoute: typeof ObchodnePodmienkyRoute
+  OchranaUdajovRoute: typeof OchranaUdajovRoute
   PlatbaRoute: typeof PlatbaRoute
-  UcetRoute: typeof UcetRoute
+  PrihlasenieRoute: typeof PrihlasenieRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/ucet': {
-      id: '/ucet'
-      path: '/ucet'
-      fullPath: '/ucet'
-      preLoaderRoute: typeof UcetRouteImport
+    '/prihlasenie': {
+      id: '/prihlasenie'
+      path: '/prihlasenie'
+      fullPath: '/prihlasenie'
+      preLoaderRoute: typeof PrihlasenieRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/platba': {
@@ -123,6 +169,20 @@ declare module '@tanstack/react-router' {
       path: '/platba'
       fullPath: '/platba'
       preLoaderRoute: typeof PlatbaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ochrana-udajov': {
+      id: '/ochrana-udajov'
+      path: '/ochrana-udajov'
+      fullPath: '/ochrana-udajov'
+      preLoaderRoute: typeof OchranaUdajovRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/obchodne-podmienky': {
+      id: '/obchodne-podmienky'
+      path: '/obchodne-podmienky'
+      fullPath: '/obchodne-podmienky'
+      preLoaderRoute: typeof ObchodnePodmienkyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/kalkulacka': {
@@ -139,12 +199,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CenyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/ucet': {
+      id: '/_authenticated/ucet'
+      path: '/ucet'
+      fullPath: '/ucet'
+      preLoaderRoute: typeof AuthenticatedUcetRouteImport
+      parentRoute: typeof AuthenticatedRoute
     }
     '/api/public/payments/webhook': {
       id: '/api/public/payments/webhook'
@@ -156,12 +230,27 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthenticatedRouteChildren {
+  AuthenticatedUcetRoute: typeof AuthenticatedUcetRoute
+}
+
+const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedUcetRoute: AuthenticatedUcetRoute,
+}
+
+const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
+  AuthenticatedRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRoute: AuthenticatedRouteWithChildren,
   CenyRoute: CenyRoute,
   KalkulackaRoute: KalkulackaRoute,
+  ObchodnePodmienkyRoute: ObchodnePodmienkyRoute,
+  OchranaUdajovRoute: OchranaUdajovRoute,
   PlatbaRoute: PlatbaRoute,
-  UcetRoute: UcetRoute,
+  PrihlasenieRoute: PrihlasenieRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
 }
 export const routeTree = rootRouteImport

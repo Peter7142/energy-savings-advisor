@@ -63,9 +63,9 @@ export function TopBar() {
               </Button>
             </div>
           ) : (
-            <Link to="/prihlasenie" className="ml-2">
+            <a href="/prihlasenie" className="ml-2">
               <Button size="sm" variant="outline">Prihlásiť</Button>
-            </Link>
+            </a>
           )}
         </nav>
       </div>
