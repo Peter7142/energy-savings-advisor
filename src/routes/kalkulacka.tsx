@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { ModeToggle, type Mode } from "@/components/ModeToggle";
 import { supabase } from "@/integrations/supabase/client";
 import { parseInvoice } from "@/lib/invoice-parser.functions";
+import { submitAndAnalyze, type FreeVerdict } from "@/lib/advisor.functions";
 import { ArrowRight, Upload, Loader2, Sparkles, ShieldCheck, Camera } from "lucide-react";
 
 export const Route = createFileRoute("/kalkulacka")({
@@ -38,6 +39,9 @@ function KalkulackaPage() {
   const uploadRef = useRef<HTMLInputElement | null>(null);
   const photoRef = useRef<HTMLInputElement | null>(null);
   const callParseInvoice = useServerFn(parseInvoice);
+  const callAnalyze = useServerFn(submitAndAnalyze);
+  const [unitPrice, setUnitPrice] = useState<string>("");
+  const [verdict, setVerdict] = useState<FreeVerdict | null>(null);
 
   function fileToDataUrl(file: File): Promise<string> {
     return new Promise((resolve, reject) => {
@@ -106,30 +110,23 @@ function KalkulackaPage() {
       }
 
       const { data: userData } = await supabase.auth.getUser();
-      const userId = userData.user?.id ?? null;
-      const userEmail = userData.user?.email ?? email ?? null;
-
-      // Estimate savings: simple heuristic — assume 10% saving vs typical SK price 0.18 €/kWh
-      const estSavings = Math.round(kwh * 0.18 * 0.10);
-
-      const { data, error } = await supabase
-        .from("quotes_household")
-        .insert({
-          user_id: userId,
-          email: userEmail,
-          distribution_area: distribution as any,
-          annual_consumption_kwh: kwh,
-          tariff_band: tariff === "Neviem" ? null : tariff,
-          current_supplier: supplier || null,
-          includes_gas: includesGas,
-          annual_gas_kwh: includesGas ? Number(annualGas) : null,
-          estimated_savings_eur: estSavings,
-        })
-        .select("id")
-        .single();
-
-      if (error) throw error;
-      navigate({ to: "/platba", search: { product: "report", quoteId: data.id } });
+      const price = unitPrice ? Number(unitPrice.replace(",", ".")) : null;
+      if (price !== null && (!(price > 0.01) || price > 1)) throw new Error("Cena za kWh má byť napr. 0,16.");
+      const res = await callAnalyze({ data: {
+        distribution_area: distribution as "ZSD" | "SSD" | "VSD",
+        annual_consumption_kwh: kwh,
+        tariff_band: tariff === "Neviem" ? null : tariff,
+        current_supplier: supplier || null,
+        current_unit_price: price,
+        current_monthly_fee: null,
+        includes_gas: includesGas,
+        annual_gas_kwh: includesGas ? Number(annualGas) : null,
+        email: userData.user?.email ?? email,
+        user_id: userData.user?.id ?? null,
+      } });
+      if (res.error || !res.result) throw new Error(res.error || "Vyhodnotenie zlyhalo.");
+      setVerdict(res.result);
+      window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (err: any) {
       setError(err.message || "Niečo sa nepodarilo.");
     } finally {
@@ -142,10 +139,12 @@ function KalkulackaPage() {
       <div className="container mx-auto px-4 py-8 max-w-xl">
         <h1 className="text-2xl font-bold mb-1">Kalkulačka úspory</h1>
         <p className="text-sm text-muted-foreground mb-6">
-          Vyplň 5 polí, my pripravíme personalizovaný report za 4,90 €.
+          Zadarmo ti povieme, či máš dobrú cenu. Presný postup ako ušetriť odomkneš za 4,90 €.
         </p>
 
-        <form onSubmit={handleSubmit} className="space-y-5 rounded-2xl border border-border bg-card p-5">
+        {verdict && <VerdictCard v={verdict} onPay={() => navigate({ to: "/platba", search: { product: "report", quoteId: verdict.quoteId } })} onReset={() => setVerdict(null)} />}
+
+        <form hidden={!!verdict} onSubmit={handleSubmit} className="space-y-5 rounded-2xl border border-border bg-card p-5">
           <ModeToggle value={mode} onChange={setMode} />
 
           {mode === "upload" && (
@@ -259,6 +258,13 @@ function KalkulackaPage() {
               </div>
 
               <div>
+                <label className="block text-sm font-medium mb-2" htmlFor="price">Tvoja cena za kWh s DPH (nepovinné)</label>
+                <Input id="price" inputMode="decimal" value={unitPrice} onChange={(e) => setUnitPrice(e.target.value)}
+                  placeholder="napr. 0,16" />
+                <p className="text-xs text-muted-foreground mt-1">Nájdeš na faktúre. Bez nej porovnáme s bežnou cenou na Slovensku.</p>
+              </div>
+
+              <div>
                 <label className="flex items-center gap-2 text-sm font-medium">
                   <input type="checkbox" checked={includesGas}
                     onChange={(e) => setIncludesGas(e.target.checked)}
@@ -281,7 +287,7 @@ function KalkulackaPage() {
               {error && <p className="text-sm text-destructive">{error}</p>}
 
               <Button type="submit" size="lg" disabled={submitting} className="w-full min-h-12">
-                {submitting ? "Pripravujem…" : <>Pokračovať na platbu 4,90&nbsp;€ <ArrowRight className="w-4 h-4 ml-1" /></>}
+                {submitting ? "AI vyhodnocuje…" : <>Zistiť zadarmo, či mám dobrú cenu <ArrowRight className="w-4 h-4 ml-1" /></>}
               </Button>
             </div>
           )}
@@ -290,5 +296,38 @@ function KalkulackaPage() {
         </form>
       </div>
     </AppShell>
+  );
+}
+
+const LABEL = {
+  good: { t: "Máš dobrú cenu 👍", c: "border-primary/40 bg-primary/5" },
+  average: { t: "Tvoja cena je priemerná", c: "border-border bg-card" },
+  overpriced: { t: "Preplácaš za energie", c: "border-destructive/40 bg-destructive/5" },
+  unknown: { t: "Zatiaľ nevieme spoľahlivo porovnať", c: "border-border bg-card" },
+} as const;
+
+function VerdictCard({ v, onPay, onReset }: { v: FreeVerdict; onPay: () => void; onReset: () => void }) {
+  const l = LABEL[v.verdict];
+  return (
+    <div className={`mb-6 rounded-2xl border p-5 space-y-3 ${l.c}`}>
+      <p className="text-xs uppercase tracking-wide text-muted-foreground">Bezplatné vyhodnotenie</p>
+      <h2 className="text-xl font-bold">{l.t}</h2>
+      {v.verdict !== "unknown" && (
+        <div className="grid grid-cols-2 gap-3 text-sm">
+          <div className="rounded-lg bg-background p-3"><p className="text-muted-foreground text-xs">Platíš ročne cca</p><p className="font-bold text-lg">{v.currentAnnual.toFixed(0)} €</p></div>
+          <div className="rounded-lg bg-background p-3"><p className="text-muted-foreground text-xs">Môžeš ušetriť</p><p className="font-bold text-lg text-primary">{v.overpay.toFixed(0)} € / rok</p></div>
+        </div>
+      )}
+      <p className="text-sm">{v.summary}</p>
+      <p className="text-xs text-muted-foreground">
+        Porovnané s {v.tariffsCompared} overenými cenníkmi.{!v.usedOwnPrice && " Nezadal si svoju cenu, počítali sme s bežnou cenou 0,18 €/kWh."} Informatívne odporúčanie.
+      </p>
+      {v.verdict !== "unknown" && v.overpay > 0 && (
+        <Button size="lg" className="w-full min-h-12" onClick={onPay}>
+          Odomknúť presný postup za 4,90&nbsp;€ <ArrowRight className="w-4 h-4 ml-1" />
+        </Button>
+      )}
+      <Button variant="ghost" className="w-full" onClick={onReset}>Upraviť údaje</Button>
+    </div>
   );
 }

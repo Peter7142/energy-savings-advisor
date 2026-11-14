@@ -18,6 +18,7 @@ import { Route as OchranaUdajovRouteImport } from './routes/ochrana-udajov'
 import { Route as PlatbaRouteImport } from './routes/platba'
 import { Route as PrihlasenieRouteImport } from './routes/prihlasenie'
 import { Route as AuthenticatedUcetRouteImport } from './routes/_authenticated/ucet'
+import { Route as ApiPublicCronScanRouteImport } from './routes/api/public/cron-scan'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 
 const IndexRoute = IndexRouteImport.update({
@@ -64,6 +65,11 @@ const AuthenticatedUcetRoute = AuthenticatedUcetRouteImport.update({
   path: '/ucet',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const ApiPublicCronScanRoute = ApiPublicCronScanRouteImport.update({
+  id: '/api/public/cron-scan',
+  path: '/api/public/cron-scan',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicPaymentsWebhookRoute =
   ApiPublicPaymentsWebhookRouteImport.update({
     id: '/api/public/payments/webhook',
@@ -80,6 +86,7 @@ export interface FileRoutesByFullPath {
   '/platba': typeof PlatbaRoute
   '/prihlasenie': typeof PrihlasenieRoute
   '/ucet': typeof AuthenticatedUcetRoute
+  '/api/public/cron-scan': typeof ApiPublicCronScanRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRoutesByTo {
@@ -91,6 +98,7 @@ export interface FileRoutesByTo {
   '/platba': typeof PlatbaRoute
   '/prihlasenie': typeof PrihlasenieRoute
   '/ucet': typeof AuthenticatedUcetRoute
+  '/api/public/cron-scan': typeof ApiPublicCronScanRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRoutesById {
@@ -104,6 +112,7 @@ export interface FileRoutesById {
   '/platba': typeof PlatbaRoute
   '/prihlasenie': typeof PrihlasenieRoute
   '/_authenticated/ucet': typeof AuthenticatedUcetRoute
+  '/api/public/cron-scan': typeof ApiPublicCronScanRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRouteTypes {
@@ -117,6 +126,7 @@ export interface FileRouteTypes {
     | '/platba'
     | '/prihlasenie'
     | '/ucet'
+    | '/api/public/cron-scan'
     | '/api/public/payments/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -128,6 +138,7 @@ export interface FileRouteTypes {
     | '/platba'
     | '/prihlasenie'
     | '/ucet'
+    | '/api/public/cron-scan'
     | '/api/public/payments/webhook'
   id:
     | '__root__'
@@ -140,6 +151,7 @@ export interface FileRouteTypes {
     | '/platba'
     | '/prihlasenie'
     | '/_authenticated/ucet'
+    | '/api/public/cron-scan'
     | '/api/public/payments/webhook'
   fileRoutesById: FileRoutesById
 }
@@ -152,6 +164,7 @@ export interface RootRouteChildren {
   OchranaUdajovRoute: typeof OchranaUdajovRoute
   PlatbaRoute: typeof PlatbaRoute
   PrihlasenieRoute: typeof PrihlasenieRoute
+  ApiPublicCronScanRoute: typeof ApiPublicCronScanRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
 }
 
@@ -220,6 +233,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedUcetRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/api/public/cron-scan': {
+      id: '/api/public/cron-scan'
+      path: '/api/public/cron-scan'
+      fullPath: '/api/public/cron-scan'
+      preLoaderRoute: typeof ApiPublicCronScanRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/payments/webhook': {
       id: '/api/public/payments/webhook'
       path: '/api/public/payments/webhook'
@@ -251,6 +271,7 @@ const rootRouteChildren: RootRouteChildren = {
   OchranaUdajovRoute: OchranaUdajovRoute,
   PlatbaRoute: PlatbaRoute,
   PrihlasenieRoute: PrihlasenieRoute,
+  ApiPublicCronScanRoute: ApiPublicCronScanRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
 }
 export const routeTree = rootRouteImport

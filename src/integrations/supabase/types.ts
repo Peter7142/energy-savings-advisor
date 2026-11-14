@@ -214,6 +214,53 @@ export type Database = {
         }
         Relationships: []
       }
+      quote_analyses: {
+        Row: {
+          best_annual_cost_eur: number | null
+          created_at: string
+          current_annual_cost_eur: number | null
+          instructions_md: string | null
+          overpay_eur: number | null
+          quote_id: string
+          recommendations: Json
+          summary: string
+          tariffs_compared: number
+          verdict: string
+        }
+        Insert: {
+          best_annual_cost_eur?: number | null
+          created_at?: string
+          current_annual_cost_eur?: number | null
+          instructions_md?: string | null
+          overpay_eur?: number | null
+          quote_id: string
+          recommendations?: Json
+          summary: string
+          tariffs_compared?: number
+          verdict: string
+        }
+        Update: {
+          best_annual_cost_eur?: number | null
+          created_at?: string
+          current_annual_cost_eur?: number | null
+          instructions_md?: string | null
+          overpay_eur?: number | null
+          quote_id?: string
+          recommendations?: Json
+          summary?: string
+          tariffs_compared?: number
+          verdict?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quote_analyses_quote_id_fkey"
+            columns: ["quote_id"]
+            isOneToOne: true
+            referencedRelation: "quotes_household"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       quotes_business: {
         Row: {
           annual_consumption_mwh: number
@@ -380,6 +427,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      scan_state: {
+        Row: {
+          id: number
+          last_result: Json | null
+          last_run_at: string | null
+          locked_until: string | null
+          pause_reason: string | null
+          status: string
+        }
+        Insert: {
+          id?: number
+          last_result?: Json | null
+          last_run_at?: string | null
+          locked_until?: string | null
+          pause_reason?: string | null
+          status?: string
+        }
+        Update: {
+          id?: number
+          last_result?: Json | null
+          last_run_at?: string | null
+          locked_until?: string | null
+          pause_reason?: string | null
+          status?: string
+        }
+        Relationships: []
       }
       subscriptions: {
         Row: {

@@ -148,7 +148,10 @@ async function handleCheckoutCompleted(session: any, env: StripeEnv) {
         .order("unit_price_eur_per_kwh", { ascending: true })
         .limit(3);
 
-      const recommendations = (tariffs ?? []).map((t: any) => ({
+      const { data: analysis } = await supabase
+        .from("quote_analyses").select("recommendations, instructions_md").eq("quote_id", quoteId).maybeSingle();
+
+      const recommendations = (analysis?.recommendations as any[])?.length ? (analysis!.recommendations as any[]) : (tariffs ?? []).map((t: any) => ({
         supplier: t.suppliers?.name ?? "—",
         product: t.product_name,
         unit_price: t.unit_price_eur_per_kwh,
@@ -162,7 +165,7 @@ async function handleCheckoutCompleted(session: any, env: StripeEnv) {
         email,
         top_recommendations: recommendations,
         estimated_savings_eur: quote.estimated_savings_eur ?? 0,
-        instructions_md: "Pozri si TOP 3 odporúčania v účte a podpíš zmluvu s vybraným dodávateľom.",
+        instructions_md: analysis?.instructions_md || "Pozri si TOP 3 odporúčania v účte a podpíš zmluvu s vybraným dodávateľom.",
       }).select("id").single();
 
       if (email) {
