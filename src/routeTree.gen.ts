@@ -9,40 +9,24 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as PrihlasenieRouteImport } from './routes/prihlasenie'
-import { Route as PlatbaRouteImport } from './routes/platba'
-import { Route as OchranaUdajovRouteImport } from './routes/ochrana-udajov'
-import { Route as ObchodnePodmienkyRouteImport } from './routes/obchodne-podmienky'
-import { Route as KalkulackaRouteImport } from './routes/kalkulacka'
-import { Route as CenyRouteImport } from './routes/ceny'
-import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
+import { Route as CenyRouteImport } from './routes/ceny'
+import { Route as KalkulackaRouteImport } from './routes/kalkulacka'
+import { Route as ObchodnePodmienkyRouteImport } from './routes/obchodne-podmienky'
+import { Route as OchranaUdajovRouteImport } from './routes/ochrana-udajov'
+import { Route as PlatbaRouteImport } from './routes/platba'
+import { Route as PrihlasenieRouteImport } from './routes/prihlasenie'
 import { Route as AuthenticatedUcetRouteImport } from './routes/_authenticated/ucet'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 
-const PrihlasenieRoute = PrihlasenieRouteImport.update({
-  id: '/prihlasenie',
-  path: '/prihlasenie',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PlatbaRoute = PlatbaRouteImport.update({
-  id: '/platba',
-  path: '/platba',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const OchranaUdajovRoute = OchranaUdajovRouteImport.update({
-  id: '/ochrana-udajov',
-  path: '/ochrana-udajov',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ObchodnePodmienkyRoute = ObchodnePodmienkyRouteImport.update({
-  id: '/obchodne-podmienky',
-  path: '/obchodne-podmienky',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const KalkulackaRoute = KalkulackaRouteImport.update({
-  id: '/kalkulacka',
-  path: '/kalkulacka',
+const AuthenticatedRoute = AuthenticatedRouteImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CenyRoute = CenyRouteImport.update({
@@ -50,13 +34,29 @@ const CenyRoute = CenyRouteImport.update({
   path: '/ceny',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedRoute = AuthenticatedRouteImport.update({
-  id: '/_authenticated',
+const KalkulackaRoute = KalkulackaRouteImport.update({
+  id: '/kalkulacka',
+  path: '/kalkulacka',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const ObchodnePodmienkyRoute = ObchodnePodmienkyRouteImport.update({
+  id: '/obchodne-podmienky',
+  path: '/obchodne-podmienky',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OchranaUdajovRoute = OchranaUdajovRouteImport.update({
+  id: '/ochrana-udajov',
+  path: '/ochrana-udajov',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlatbaRoute = PlatbaRouteImport.update({
+  id: '/platba',
+  path: '/platba',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrihlasenieRoute = PrihlasenieRouteImport.update({
+  id: '/prihlasenie',
+  path: '/prihlasenie',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedUcetRoute = AuthenticatedUcetRouteImport.update({
@@ -157,46 +157,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/prihlasenie': {
-      id: '/prihlasenie'
-      path: '/prihlasenie'
-      fullPath: '/prihlasenie'
-      preLoaderRoute: typeof PrihlasenieRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/platba': {
-      id: '/platba'
-      path: '/platba'
-      fullPath: '/platba'
-      preLoaderRoute: typeof PlatbaRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/ochrana-udajov': {
-      id: '/ochrana-udajov'
-      path: '/ochrana-udajov'
-      fullPath: '/ochrana-udajov'
-      preLoaderRoute: typeof OchranaUdajovRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/obchodne-podmienky': {
-      id: '/obchodne-podmienky'
-      path: '/obchodne-podmienky'
-      fullPath: '/obchodne-podmienky'
-      preLoaderRoute: typeof ObchodnePodmienkyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/kalkulacka': {
-      id: '/kalkulacka'
-      path: '/kalkulacka'
-      fullPath: '/kalkulacka'
-      preLoaderRoute: typeof KalkulackaRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/ceny': {
-      id: '/ceny'
-      path: '/ceny'
-      fullPath: '/ceny'
-      preLoaderRoute: typeof CenyRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated': {
@@ -206,11 +171,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/ceny': {
+      id: '/ceny'
+      path: '/ceny'
+      fullPath: '/ceny'
+      preLoaderRoute: typeof CenyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/kalkulacka': {
+      id: '/kalkulacka'
+      path: '/kalkulacka'
+      fullPath: '/kalkulacka'
+      preLoaderRoute: typeof KalkulackaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/obchodne-podmienky': {
+      id: '/obchodne-podmienky'
+      path: '/obchodne-podmienky'
+      fullPath: '/obchodne-podmienky'
+      preLoaderRoute: typeof ObchodnePodmienkyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ochrana-udajov': {
+      id: '/ochrana-udajov'
+      path: '/ochrana-udajov'
+      fullPath: '/ochrana-udajov'
+      preLoaderRoute: typeof OchranaUdajovRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/platba': {
+      id: '/platba'
+      path: '/platba'
+      fullPath: '/platba'
+      preLoaderRoute: typeof PlatbaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/prihlasenie': {
+      id: '/prihlasenie'
+      path: '/prihlasenie'
+      fullPath: '/prihlasenie'
+      preLoaderRoute: typeof PrihlasenieRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/ucet': {
